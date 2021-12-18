@@ -123,4 +123,4 @@ work_dirs/
 *.sh~
 
 .dev_scripts
-results
+tools/results
