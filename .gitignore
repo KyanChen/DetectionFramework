@@ -122,5 +122,5 @@ work_dirs/
 *.py~
 *.sh~
 
-.dev_scripts
-tools/results
+.dev_scripts/
+tools/results/
