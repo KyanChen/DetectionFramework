@@ -124,3 +124,4 @@ work_dirs/
 
 .dev_scripts/
 tools/results/
+.circleci
