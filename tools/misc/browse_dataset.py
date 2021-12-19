@@ -14,7 +14,7 @@ from mmdet.datasets.builder import build_dataset
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Browse a dataset')
-    parser.add_argument('config', help='train config file path')
+    parser.add_argument('--config', default='../../configs/yolo/yolov4_d53_mstrain_256_300e_coco.py', help='train config file path')
     parser.add_argument(
         '--skip-type',
         type=str,
