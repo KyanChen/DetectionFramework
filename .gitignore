@@ -122,6 +122,5 @@ work_dirs/
 *.py~
 *.sh~
 
-.dev_scripts/
 tools/results/
-.circleci/
+.github
