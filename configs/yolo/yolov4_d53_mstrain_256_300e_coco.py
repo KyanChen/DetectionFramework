@@ -1,12 +1,10 @@
-
-
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=5)
 # yapf:disable
 log_config = dict(
-    interval=50,
+    interval=3,
     hooks=[
         dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
+        dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]
@@ -15,7 +13,8 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
 resume_from = None
-workflow = [('train', 1)]
+workflow = [('train', 1), ('val', 1)]
+
 class_name = ['1', '2', '3']
 
 # model settings
@@ -72,8 +71,9 @@ model = dict(
         nms=dict(type='nms', iou_threshold=0.45),
         max_per_img=100))
 # dataset settings
-dataset_type = 'CocoDataset'
-data_root = '/Users/kyanchen/Code/mmdetection/data/multi_label'
+dataset_type = 'MyCocoDataset'
+# data_root = '/Users/kyanchen/Code/mmdetection/data/multi_label'
+data_root = '../data/multi_label'
 img_norm_cfg = dict(mean=[0, 0, 0], std=[255., 255., 255.], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile', to_float32=True),

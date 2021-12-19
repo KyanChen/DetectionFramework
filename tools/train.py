@@ -33,7 +33,7 @@ def parse_args():
     group_gpus = parser.add_mutually_exclusive_group()
     group_gpus.add_argument(
         '--gpus',
-        default=0,
+        default=1,
         type=int,
         help='number of gpus to use '
         '(only applicable to non-distributed training)')

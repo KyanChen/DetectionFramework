@@ -1,7 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import pycocotools.mask as mask_util
 
 
 def split_combined_polys(polys, poly_lens, polys_per_mask):
@@ -35,6 +34,7 @@ def split_combined_polys(polys, poly_lens, polys_per_mask):
 
 # TODO: move this function to more proper place
 def encode_mask_results(mask_results):
+    from ...datasets.api_wrappers.COCOTools import maskUtils
     """Encode bitmap mask to RLE code.
 
     Args:
@@ -54,7 +54,7 @@ def encode_mask_results(mask_results):
     for i in range(len(cls_segms)):
         for cls_segm in cls_segms[i]:
             encoded_mask_results[i].append(
-                mask_util.encode(
+                maskUtils.encode(
                     np.array(
                         cls_segm[:, :, np.newaxis], order='F',
                         dtype='uint8'))[0])  # encoded with RLE

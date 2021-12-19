@@ -3,11 +3,12 @@ import os.path as osp
 
 import mmcv
 import numpy as np
-import pycocotools.mask as maskUtils
 
-from mmdet.core import BitmapMasks, PolygonMasks
+from mmdet.core.mask import BitmapMasks
+from mmdet.core.mask import PolygonMasks
+
 from ..builder import PIPELINES
-
+from ..api_wrappers.COCOTools import maskUtils
 try:
     from panopticapi.utils import rgb2id
 except ImportError:

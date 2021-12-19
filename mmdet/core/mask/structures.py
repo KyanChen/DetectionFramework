@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 import cv2
 import mmcv
 import numpy as np
-import pycocotools.mask as maskUtils
 import torch
 from mmcv.ops.roi_align import roi_align
 
@@ -1055,6 +1054,7 @@ class PolygonMasks(BaseInstanceMasks):
 
 
 def polygon_to_bitmap(polygons, height, width):
+    from mmdet.datasets.api_wrappers.COCOTools import maskUtils
     """Convert masks from the form of polygons to bitmaps.
 
     Args:
