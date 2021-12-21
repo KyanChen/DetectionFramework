@@ -354,9 +354,11 @@ class MyCocoDataset(CustomDataset):
                  logger=None,
                  jsonfile_prefix=None,
                  classwise=False,
-                 proposal_nums=(100, 300, 1000),
+                 proposal_nums=(1, 10, 100),
                  iou_thrs=None,
-                 metric_items=None):
+                 areaRng=None,
+                 metric_items=None,
+                 mode='eval'):
         """Evaluation in COCO protocol.
 
         Args:
@@ -396,6 +398,8 @@ class MyCocoDataset(CustomDataset):
         if iou_thrs is None:
             iou_thrs = np.linspace(
                 .5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        if areaRng is None:
+            areaRng = [0, 32, 96]
         if metric_items is not None:
             if not isinstance(metric_items, list):
                 metric_items = [metric_items]
@@ -452,8 +456,14 @@ class MyCocoDataset(CustomDataset):
             cocoEval = COCOeval(cocoGt, cocoDt, iou_type)
             cocoEval.params.catIds = self.cat_ids
             cocoEval.params.imgIds = self.img_ids
+            assert len(proposal_nums) == 3
             cocoEval.params.maxDets = list(proposal_nums)
             cocoEval.params.iouThrs = iou_thrs
+            assert len(areaRng) == 3
+            cocoEval.params.areaRng = [[areaRng[0] ** 2, 1e5 ** 2],
+                                       [areaRng[0] ** 2, areaRng[1] ** 2],
+                                       [areaRng[1] ** 2, areaRng[2] ** 2],
+                                       [areaRng[2] ** 2, 1e5 ** 2]]
             # mapping of cocoEval.stats
             coco_metric_names = {
                 'mAP': 0,
@@ -462,12 +472,16 @@ class MyCocoDataset(CustomDataset):
                 'mAP_s': 3,
                 'mAP_m': 4,
                 'mAP_l': 5,
-                'AR@100': 6,
-                'AR@300': 7,
-                'AR@1000': 8,
-                'AR_s@1000': 9,
-                'AR_m@1000': 10,
-                'AR_l@1000': 11
+                f'AR_{proposal_nums[0]}': 6,
+                f'AR_{proposal_nums[1]}': 7,
+                f'AR_{proposal_nums[2]}': 8,
+                f'AR_s_{proposal_nums[2]}': 9,
+                f'AR_m_{proposal_nums[2]}': 10,
+                f'AR_l_{proposal_nums[2]}': 11,
+                f'AP_50_s': 12,
+                f'AP_50_m': 13,
+                f'AR_50_s': 14,
+                f'AR_50_m': 15,
             }
             if metric_items is not None:
                 for metric_item in metric_items:
@@ -542,19 +556,19 @@ class MyCocoDataset(CustomDataset):
 
                 if metric_items is None:
                     metric_items = [
-                        'mAP', 'mAP_50', 'mAP_75', 'mAP_s', 'mAP_m', 'mAP_l'
+                        'mAP', 'mAP_50', 'mAP_75', 'mAP_s', 'mAP_m', 'mAP_l',
+                        f'AP_50_s', f'AP_50_m', 'AR_50_s', f'AR_50_m'
                     ]
 
                 for metric_item in metric_items:
-                    key = f'{metric}_{metric_item}'
+                    key = f'{mode}_{metric}_{metric_item}'
                     val = float(
                         f'{cocoEval.stats[coco_metric_names[metric_item]]:.3f}'
                     )
                     eval_results[key] = val
-                ap = cocoEval.stats[:6]
-                eval_results[f'{metric}_mAP_copypaste'] = (
-                    f'{ap[0]:.3f} {ap[1]:.3f} {ap[2]:.3f} {ap[3]:.3f} '
-                    f'{ap[4]:.3f} {ap[5]:.3f}')
+                # ap = cocoEval.stats[:6]
+                all_metrics = cocoEval.stats
+                eval_results[f'{mode}_{metric}_all_metrics'] = ' '.join([f'{x:.3f}' for x in all_metrics])
         if tmp_dir is not None:
             tmp_dir.cleanup()
         return eval_results

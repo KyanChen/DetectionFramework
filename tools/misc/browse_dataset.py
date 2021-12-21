@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
-from collections import Sequence
+from collections.abc import Sequence
 from pathlib import Path
 
 import mmcv
@@ -86,7 +86,7 @@ def main():
         if gt_masks is not None:
             gt_masks = mask2ndarray(gt_masks)
 
-        imshow_det_bboxes(
+        imshow_det_bvboxes(
             item['img'],
             item['gt_bboxes'],
             item['gt_labels'],

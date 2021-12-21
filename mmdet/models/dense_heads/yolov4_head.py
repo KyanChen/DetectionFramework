@@ -16,6 +16,7 @@ from mmdet.core import (build_assigner, build_bbox_coder,
 from ..builder import HEADS, build_loss
 from .base_dense_head import BaseDenseHead
 from .dense_test_mixins import BBoxTestMixin
+import numpy as np
 
 
 @HEADS.register_module()
@@ -267,7 +268,7 @@ class YOLOV4Head(BaseDenseHead, BBoxTestMixin):
 
         if rescale:
             flatten_bboxes /= flatten_bboxes.new_tensor(
-                scale_factors).unsqueeze(1)
+                np.array(scale_factors)).unsqueeze(1)
 
         padding = flatten_bboxes.new_zeros(num_imgs, flatten_bboxes.shape[1],
                                            1)

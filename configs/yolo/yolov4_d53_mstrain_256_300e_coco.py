@@ -1,7 +1,7 @@
 checkpoint_config = dict(interval=5)
 # yapf:disable
 log_config = dict(
-    interval=3,
+    interval=2,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='TensorboardLoggerHook')
@@ -11,11 +11,11 @@ custom_hooks = [dict(type='NumClassCheckHook')]
 
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = 'results/test/latest.pth'
 resume_from = None
-workflow = [('train', 1), ('val', 1)]
+workflow = [('train', 1)]
 
-class_name = ['1', '2', '3']
+class_name = ['0']
 
 # model settings
 model = dict(
@@ -34,9 +34,14 @@ model = dict(
         out_channels=[1024, 512, 256],
         anchor_generator=dict(
             type='YOLOAnchorGenerator',
-            base_sizes=[[(116, 90), (156, 198), (373, 326)],
-                        [(30, 61), (62, 45), (59, 119)],
-                        [(10, 13), (16, 30), (33, 23)]],
+            # base_sizes=[[(116, 90), (156, 198), (373, 326)],
+            #             [(30, 61), (62, 45), (59, 119)],
+            #             [(10, 13), (16, 30), (33, 23)]],
+            base_size=[
+                [[30, 28], [33, 17], [21, 25]],
+                [[24, 17], [18, 17], [14, 21]],
+                [[20, 12], [12, 15], [11, 11]]
+                       ],
             strides=[32, 16, 8]),
         bbox_coder=dict(type='YOLOBBoxCoder'),
         featmap_strides=[32, 16, 8],
@@ -73,8 +78,10 @@ model = dict(
 # dataset settings
 dataset_type = 'MyCocoDataset'
 # data_root = '/Users/kyanchen/Code/mmdetection/data/multi_label'
-data_root = '../data/multi_label'
-img_norm_cfg = dict(mean=[0, 0, 0], std=[255., 255., 255.], to_rgb=True)
+data_root = r'M:\Tiny_Ship\20211214_All_P_Slice_Data'
+
+img_norm_cfg = dict(mean=[52.27434974492982, 69.82640643452488, 79.01744958336889],
+                    std=[2.7533898592345842, 2.634773617140497, 2.172352333590293], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile', to_float32=True),
     dict(type='LoadAnnotations', with_bbox=True),
@@ -119,32 +126,39 @@ data = dict(
     workers_per_gpu=1,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + '/../data_test.json',
-        img_prefix=data_root,
+        ann_file='../../data/tiny_ship/tiny_train.json',
+        img_prefix=data_root+'/train',
         classes=class_name,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + '/../data_test.json',
-        img_prefix=data_root,
+        ann_file='../../data/tiny_ship/tiny_val.json',
+        img_prefix=data_root+'/val',
         classes=class_name,
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + '/../data_test.json',
+        ann_file='../../data/tiny_ship/tiny_test.json',
         classes=class_name,
-        img_prefix=data_root,
+        img_prefix=data_root+'/test',
         pipeline=test_pipeline))
 # optimizer
-optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
-optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+# AdamW
+# optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
+optimizer = dict(type='AdamW', lr=0.01, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2)
+# optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 # learning policy
+# lr_config = dict(
+#     policy='PolyLrUpdaterHook',
+#     warmup='linear',
+#     warmup_iters=2000,  # same as burn-in in darknet
+#     warmup_ratio=0.1,
+#     step=[218, 246])
 lr_config = dict(
-    policy='step',
-    warmup='linear',
-    warmup_iters=2000,  # same as burn-in in darknet
-    warmup_ratio=0.1,
-    step=[218, 246])
+    policy='Poly', power=0.9, min_lr=0.00001, by_epoch=True,
+    warmup='linear', warmup_iters=10, warmup_ratio=0.1, warmup_by_epoch=True)
+
 # runtime settings
 runner = dict(type='EpochBasedRunner', max_epochs=300)
-evaluation = dict(interval=1, metric=['bbox'])
+evaluation = dict(interval=1, metric=['bbox'], mode='eval', areaRng=[0, 20, 200])
+test = dict(interval=1, metric=['bbox'], mode='test', areaRng=[0, 20, 200])

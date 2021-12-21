@@ -82,10 +82,10 @@ class YOLOV4(SingleStageDetector):
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
         """
-        img = img.data[0]
-        img_metas = img_metas.data[0]
-        gt_bboxes = gt_bboxes.data[0]
-        gt_labels = gt_labels.data[0]
+        # img = img.data[0]
+        # img_metas = img_metas.data[0]
+        # gt_bboxes = gt_bboxes.data[0]
+        # gt_labels = gt_labels.data[0]
         super(SingleStageDetector, self).forward_train(img, img_metas)
         x = self.extract_feat(img)
         losses = self.bbox_head.forward_train(x, img_metas, gt_bboxes,
@@ -223,8 +223,8 @@ class YOLOV4(SingleStageDetector):
                 augs (multiscale, flip, etc.) and the inner list indicates
                 images in a batch.
         """
-        img_metas = [x.data for x in img_metas]
-        img_metas = [x[0] for x in img_metas]
+        # img_metas = [x.data for x in img_metas]
+        # img_metas = [x[0] for x in img_metas]
         for var, name in [(imgs, 'imgs'), (img_metas, 'img_metas')]:
             if not isinstance(var, list):
                 raise TypeError(f'{name} must be a list, but got {type(var)}')
@@ -258,3 +258,18 @@ class YOLOV4(SingleStageDetector):
             # TODO: support test augmentation for predefined proposals
             assert 'proposals' not in kwargs
             return self.aug_test(imgs, img_metas, **kwargs)
+
+    def val_step(self, data, optimizer=None):
+        """The iteration step during validation.
+
+        This method shares the same signature as :func:`train_step`, but used
+        during val epochs. Note that the evaluation after training epochs is
+        not implemented with this method, but an evaluation hook.
+        """
+        losses = self(**data)
+        loss, log_vars = self._parse_losses(losses)
+
+        outputs = dict(
+            loss=loss, log_vars=log_vars, num_samples=len(data['img_metas']))
+
+        return outputs

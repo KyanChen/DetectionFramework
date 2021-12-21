@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import mmcv
 import numpy as np
-from ...datasets.api_wrappers import maskUtils as mask_util
+
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 
@@ -244,6 +244,8 @@ def imshow_gt_det_bboxes(img,
     Returns:
         ndarray: The image with bboxes or masks drawn on it.
     """
+    # from ...datasets.api_wrappers import maskUtils as mask_util
+
     assert 'gt_bboxes' in annotation
     assert 'gt_labels' in annotation
     assert isinstance(
@@ -286,6 +288,7 @@ def imshow_gt_det_bboxes(img,
 
     segms = None
     if segm_result is not None and len(labels) > 0:  # non empty
+        from ...datasets.api_wrappers import maskUtils as mask_util
         segms = mmcv.concat_list(segm_result)
         segms = mask_util.decode(segms)
         segms = segms.transpose(2, 0, 1)

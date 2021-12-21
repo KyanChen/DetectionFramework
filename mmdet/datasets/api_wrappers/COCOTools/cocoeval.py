@@ -18,8 +18,8 @@ class COCOeval:
     # For example usage see evalDemo.m and http://mscoco.org/.
     #
     # The evaluation parameters are as follows (defaults in brackets):
-    #  imgIds     - [all] N img ids to use for evaluation
-    #  catIds     - [all] K cat ids to use for evaluation
+    #  img_ids     - [all] N img ids to use for evaluation
+    #  cat_ids     - [all] K cat ids to use for evaluation
     #  iouThrs    - [.5:.05:.95] T=10 IoU thresholds for evaluation
     #  recThrs    - [0:.01:1] R=101 recall thresholds for evaluation
     #  areaRng    - [...] A=4 object area ranges for evaluation
@@ -75,8 +75,8 @@ class COCOeval:
         self.stats = []                     # result summarization
         self.ious = {}                      # ious between all gts and dts
         if not cocoGt is None:
-            self.params.imgIds = sorted(cocoGt.getImgIds())
-            self.params.catIds = sorted(cocoGt.getCatIds())
+            self.params.img_ids = sorted(cocoGt.get_img_ids())
+            self.params.cat_ids = sorted(cocoGt.get_cat_ids())
 
 
     def _prepare(self):
@@ -91,11 +91,11 @@ class COCOeval:
                 ann['segmentation'] = rle
         p = self.params
         if p.useCats:
-            gts=self.cocoGt.loadAnns(self.cocoGt.getAnnIds(imgIds=p.imgIds, catIds=p.catIds))
-            dts=self.cocoDt.loadAnns(self.cocoDt.getAnnIds(imgIds=p.imgIds, catIds=p.catIds))
+            gts=self.cocoGt.load_anns(self.cocoGt.get_ann_ids(img_ids=p.img_ids, cat_ids=p.cat_ids))
+            dts=self.cocoDt.load_anns(self.cocoDt.get_ann_ids(img_ids=p.img_ids, cat_ids=p.cat_ids))
         else:
-            gts=self.cocoGt.loadAnns(self.cocoGt.getAnnIds(imgIds=p.imgIds))
-            dts=self.cocoDt.loadAnns(self.cocoDt.getAnnIds(imgIds=p.imgIds))
+            gts=self.cocoGt.load_anns(self.cocoGt.get_ann_ids(img_ids=p.img_ids))
+            dts=self.cocoDt.load_anns(self.cocoDt.get_ann_ids(img_ids=p.img_ids))
 
         # convert ground truth to mask if iouType == 'segm'
         if p.iouType == 'segm':
@@ -129,30 +129,30 @@ class COCOeval:
             p.iouType = 'segm' if p.useSegm == 1 else 'bbox'
             # print('useSegm (deprecated) is not None. Running {} evaluation'.format(p.iouType))
         # print('Evaluate annotation type *{}*'.format(p.iouType))
-        p.imgIds = list(np.unique(p.imgIds))
+        p.img_ids = list(np.unique(p.img_ids))
         if p.useCats:
-            p.catIds = list(np.unique(p.catIds))
+            p.cat_ids = list(np.unique(p.cat_ids))
         p.maxDets = sorted(p.maxDets)
         self.params = p
 
         self._prepare()
         # loop through images, area range, max detection number
-        catIds = p.catIds if p.useCats else [-1]
+        cat_ids = p.cat_ids if p.useCats else [-1]
 
         if p.iouType == 'segm' or p.iouType == 'bbox':
             computeIoU = self.computeIoU
         elif p.iouType == 'keypoints':
             computeIoU = self.computeOks
         self.ious = {(imgId, catId): computeIoU(imgId, catId) \
-                        for imgId in p.imgIds
-                        for catId in catIds}
+                        for imgId in p.img_ids
+                        for catId in cat_ids}
 
         evaluateImg = self.evaluateImg
         maxDet = p.maxDets[-1]
         self.evalImgs = [evaluateImg(imgId, catId, areaRng, maxDet)
-                 for catId in catIds
+                 for catId in cat_ids
                  for areaRng in p.areaRng
-                 for imgId in p.imgIds
+                 for imgId in p.img_ids
              ]
         self._paramsEval = copy.deepcopy(self.params)
         toc = time.time()
@@ -164,8 +164,8 @@ class COCOeval:
             gt = self._gts[imgId,catId]
             dt = self._dts[imgId,catId]
         else:
-            gt = [_ for cId in p.catIds for _ in self._gts[imgId,cId]]
-            dt = [_ for cId in p.catIds for _ in self._dts[imgId,cId]]
+            gt = [_ for cId in p.cat_ids for _ in self._gts[imgId,cId]]
+            dt = [_ for cId in p.cat_ids for _ in self._dts[imgId,cId]]
         if len(gt) == 0 and len(dt) ==0:
             return []
         inds = np.argsort([-d['score'] for d in dt], kind='mergesort')
@@ -240,8 +240,8 @@ class COCOeval:
             gt = self._gts[imgId,catId]
             dt = self._dts[imgId,catId]
         else:
-            gt = [_ for cId in p.catIds for _ in self._gts[imgId,cId]]
-            dt = [_ for cId in p.catIds for _ in self._dts[imgId,cId]]
+            gt = [_ for cId in p.cat_ids for _ in self._gts[imgId,cId]]
+            dt = [_ for cId in p.cat_ids for _ in self._dts[imgId,cId]]
         if len(gt) == 0 and len(dt) ==0:
             return None
 
@@ -323,10 +323,10 @@ class COCOeval:
         # allows input customized parameters
         if p is None:
             p = self.params
-        p.catIds = p.catIds if p.useCats == 1 else [-1]
+        p.cat_ids = p.cat_ids if p.useCats == 1 else [-1]
         T           = len(p.iouThrs)
         R           = len(p.recThrs)
-        K           = len(p.catIds) if p.useCats else 1
+        K           = len(p.cat_ids) if p.useCats else 1
         A           = len(p.areaRng)
         M           = len(p.maxDets)
         precision   = -np.ones((T,R,K,A,M)) # -1 for the precision of absent categories
@@ -335,17 +335,17 @@ class COCOeval:
 
         # create dictionary for future indexing
         _pe = self._paramsEval
-        catIds = _pe.catIds if _pe.useCats else [-1]
-        setK = set(catIds)
+        cat_ids = _pe.cat_ids if _pe.useCats else [-1]
+        setK = set(cat_ids)
         setA = set(map(tuple, _pe.areaRng))
         setM = set(_pe.maxDets)
-        setI = set(_pe.imgIds)
+        setI = set(_pe.img_ids)
         # get inds to evaluate
-        k_list = [n for n, k in enumerate(p.catIds)  if k in setK]
+        k_list = [n for n, k in enumerate(p.cat_ids)  if k in setK]
         m_list = [m for n, m in enumerate(p.maxDets) if m in setM]
         a_list = [n for n, a in enumerate(map(lambda x: tuple(x), p.areaRng)) if a in setA]
-        i_list = [n for n, i in enumerate(p.imgIds)  if i in setI]
-        I0 = len(_pe.imgIds)
+        i_list = [n for n, i in enumerate(p.img_ids)  if i in setI]
+        I0 = len(_pe.img_ids)
         A0 = len(_pe.areaRng)
         # retrieve E at each category, area range, and max number of detections
         for k, k0 in enumerate(k_list):
@@ -504,8 +504,8 @@ class Params:
     Params for coco evaluation api
     '''
     def setDetParams(self):
-        self.imgIds = []
-        self.catIds = []
+        self.img_ids = []
+        self.cat_ids = []
         # np.arange causes trouble.  the data point on arange is slightly larger than the true value
         self.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
         self.recThrs = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)
@@ -516,8 +516,8 @@ class Params:
         self.useCats = 1
 
     def setKpParams(self):
-        self.imgIds = []
-        self.catIds = []
+        self.img_ids = []
+        self.cat_ids = []
         # np.arange causes trouble.  the data point on arange is slightly larger than the true value
         self.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
         self.recThrs = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)

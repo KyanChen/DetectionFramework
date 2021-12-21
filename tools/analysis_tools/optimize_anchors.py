@@ -34,28 +34,28 @@ from mmdet.utils import get_root_logger
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Optimize anchor parameters.')
-    parser.add_argument('config', help='Train config file path.')
+    parser.add_argument('--config', default='../../configs/yolo/yolov4_d53_mstrain_256_300e_coco.py', help='Train config file path.')
     parser.add_argument(
         '--device', default='cuda:0', help='Device used for calculating.')
     parser.add_argument(
         '--input-shape',
         type=int,
         nargs='+',
-        default=[608, 608],
+        default=[256, 256],
         help='input image size')
     parser.add_argument(
         '--algorithm',
-        default='differential_evolution',
+        default='k-means',
         help='Algorithm used for anchor optimizing.'
         'Support k-means and differential_evolution for YOLO.')
     parser.add_argument(
         '--iters',
-        default=1000,
+        default=500,
         type=int,
         help='Maximum iterations for optimizer.')
     parser.add_argument(
         '--output-dir',
-        default=None,
+        default='./anchors',
         type=str,
         help='Path to save anchor optimize result.')
 
@@ -198,7 +198,7 @@ class YOLOKMeansAnchorOptimizer(BaseAnchorOptimizer):
                                 cluster_centers).max(1)[0].mean().item()
 
         anchors = bbox_xyxy_to_cxcywh(cluster_centers)[:, 2:].cpu().numpy()
-        anchors = sorted(anchors, key=lambda x: x[0] * x[1])
+        anchors = sorted(anchors, key=lambda x: x[0] * x[1], reverse=True)
         self.logger.info(f'Anchor cluster finish. Average IOU: {avg_iou}')
 
         return anchors
