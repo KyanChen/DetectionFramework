@@ -5,7 +5,7 @@ import tempfile
 import mmcv
 import numpy as np
 
-from mmdet.datasets.api_wrappers import pq_compute_single_core
+from mmdet.utils.api_wrappers import pq_compute_single_core
 from mmdet.datasets.coco_panoptic import INSTANCE_OFFSET, CocoPanopticDataset
 
 try:

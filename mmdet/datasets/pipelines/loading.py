@@ -8,7 +8,7 @@ from mmdet.core.mask import BitmapMasks
 from mmdet.core.mask import PolygonMasks
 
 from ..builder import PIPELINES
-from ..api_wrappers.COCOTools import maskUtils
+from mmdet.utils.api_wrappers import maskUtils
 try:
     from panopticapi.utils import rgb2id
 except ImportError:

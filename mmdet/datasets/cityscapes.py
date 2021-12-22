@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 import mmcv
 import numpy as np
-from .api_wrappers.COCOTools import maskUtils
+from mmdet.utils.api_wrappers import maskUtils
 from mmcv.utils import print_log
 
 from .builder import DATASETS

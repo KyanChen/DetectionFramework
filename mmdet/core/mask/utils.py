@@ -34,7 +34,7 @@ def split_combined_polys(polys, poly_lens, polys_per_mask):
 
 # TODO: move this function to more proper place
 def encode_mask_results(mask_results):
-    from ...datasets.api_wrappers.COCOTools import maskUtils
+    from mmdet.utils.api_wrappers import maskUtils
     """Encode bitmap mask to RLE code.
 
     Args:

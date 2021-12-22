@@ -1054,7 +1054,7 @@ class PolygonMasks(BaseInstanceMasks):
 
 
 def polygon_to_bitmap(polygons, height, width):
-    from mmdet.datasets.api_wrappers.COCOTools import maskUtils
+    from mmdet.utils.api_wrappers.COCOTools import maskUtils
     """Convert masks from the form of polygons to bitmaps.
 
     Args:

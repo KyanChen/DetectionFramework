@@ -86,7 +86,7 @@ def decode(rleObjs):
     if type(rleObjs) == list:
         return _mask.decode(rleObjs)
     else:
-        return _mask.decode([rleObjs])[:,:,0]
+        return _mask.decode([rleObjs])[:, :, 0]
 
 def area(rleObjs):
     if type(rleObjs) == list:
