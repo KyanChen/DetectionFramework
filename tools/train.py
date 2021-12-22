@@ -22,7 +22,7 @@ from mmdet.utils import collect_env, get_root_logger
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
     parser.add_argument('--config', default='../configs/yolo/yolov4_d53_mstrain_256_300e_coco.py', help='train config file path')
-    parser.add_argument('--work-dir', default='results/test', help='the dir to save logs and models')
+    parser.add_argument('--work-dir', default='results/EXP4', help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from', help='the checkpoint file to resume from')
     parser.add_argument(
@@ -38,13 +38,13 @@ def parse_args():
     group_gpus = parser.add_mutually_exclusive_group()
     group_gpus.add_argument(
         '--gpus',
-        default=1,
+        default=2,
         type=int,
         help='number of gpus to use '
         '(only applicable to non-distributed training)')
     group_gpus.add_argument(
         '--gpu-ids',
-        default=[0],
+        default=[5,6],
         type=int,
         nargs='+',
         help='ids of gpus to use '

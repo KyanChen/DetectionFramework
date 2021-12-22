@@ -1,7 +1,7 @@
 checkpoint_config = dict(interval=20)
 # yapf:disable
 log_config = dict(
-    interval=200,
+    interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='TensorboardLoggerHook')
@@ -81,8 +81,8 @@ model = dict(
 # dataset settings
 dataset_type = 'MyCocoDataset'
 # data_root = '/Users/kyanchen/Code/mmdetection/data/multi_label'
-data_root = r'M:\Tiny_Ship\20211214_All_P_Slice_Data'
-
+# data_root = r'M:\Tiny_Ship\20211214_All_P_Slice_Data'
+data_root = '/data/kyanchen/det/data/Tiny_P'
 img_norm_cfg = dict(mean=[52.27434974492982, 69.82640643452488, 79.01744958336889],
                     std=[2.7533898592345842, 2.634773617140497, 2.172352333590293], to_rgb=True)
 train_pipeline = [
@@ -92,7 +92,7 @@ train_pipeline = [
         type='Expand',
         mean=img_norm_cfg['mean'],
         to_rgb=img_norm_cfg['to_rgb'],
-        ratio_range=(1, 1.4)),
+        ratio_range=(1, 1.2)),
     dict(
         type='MinIoURandomCrop',
         min_ious=(0.01, 0.05, 0.1),
@@ -130,8 +130,8 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=1,
+    samples_per_gpu=100,
+    workers_per_gpu=10,
     train=dict(
         type=dataset_type,
         ann_file='../data/tiny_ship/tiny_train.json',
@@ -155,7 +155,7 @@ data = dict(
 # optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
 optimizer = dict(type='AdamW', lr=0.01, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2)
 # optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
-optimizer_config = None
+optimizer_config = dict(grad_clip=None)
 # learning policy
 # lr_config = dict(
 #     policy='PolyLrUpdaterHook',
@@ -165,9 +165,9 @@ optimizer_config = None
 #     step=[218, 246])
 lr_config = dict(
     policy='Poly', power=0.9, min_lr=0.00001, by_epoch=True,
-    warmup='linear', warmup_iters=10, warmup_ratio=0.1, warmup_by_epoch=True)
+    warmup='linear', warmup_iters=15, warmup_ratio=0.1, warmup_by_epoch=True)
 
 # runtime settings
 runner = dict(type='EpochBasedRunner', max_epochs=300)
 evaluation = dict(interval=1, metric=['bbox'], mode='eval', areaRng=[0, 20, 200])
-test = dict(interval=1, metric=['bbox'], mode='test', areaRng=[0, 20, 200])
+test = dict(interval=2, metric=['bbox'], mode='test', areaRng=[0, 20, 200])
