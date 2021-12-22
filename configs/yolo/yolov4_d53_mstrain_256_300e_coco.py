@@ -1,7 +1,7 @@
 checkpoint_config = dict(interval=20)
 # yapf:disable
 log_config = dict(
-    interval=50,
+    interval=5,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='TensorboardLoggerHook')
@@ -131,7 +131,7 @@ test_pipeline = [
 ]
 data = dict(
     samples_per_gpu=100,
-    workers_per_gpu=10,
+    workers_per_gpu=8,
     train=dict(
         type=dataset_type,
         ann_file='../data/tiny_ship/tiny_train.json',
